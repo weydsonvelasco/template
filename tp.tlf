@@ -3,43 +3,16 @@ apiVersion: template.openshift.io/v1
 metadata:
   name: angular-caixa-release
   namespace: openshift
-  uid: 61048b34-98c1-4b06-83f4-253258501f7e
-  resourceVersion: '1520577'
-  creationTimestamp: '2025-09-26T13:48:51Z'
   labels:
     template: createbyads
   annotations:
     description: Template Angular Release.
     iconClass: icon-nginx
-    kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"template.openshift.io/v1","kind":"Template","labels":{"template":"angular-caixa-release"},"message":"The following service(s) have been created in your project: ${NAME}.","metadata":{"annotations":{"description":"Template Angular Release.","iconClass":"icon-nginx","openshift.io/display-name":"Angular Release Caixa","tags":"hidden,nginx"},"creationTimestamp":"2022-11-11T13:49:03Z","labels":{"template":"createbyads"},"managedFields":[{"apiVersion":"template.openshift.io/v1","fieldsType":"FieldsV1","fieldsV1":{"f:labels":{".":{},"f:template":{}},"f:message":{},"f:metadata":{"f:annotations":{".":{},"f:description":{},"f:iconClass":{},"f:kubectl.kubernetes.io/last-applied-configuration":{},"f:openshift.io/display-name":{},"f:tags":{}},"f:labels":{".":{},"f:template":{}}},"f:parameters":{}},"manager":"kubectl-client-side-apply","operation":"Update","time":"2022-11-11T13:49:03Z"},{"apiVersion":"template.openshift.io/v1","fieldsType":"FieldsV1","fieldsV1":{"f:objects":{}},"manager":"kubectl-edit","operation":"Update","time":"2022-11-11T21:03:12Z"}],"name":"angular-caixa-release","namespace":"openshift","resourceVersion":"1081590","uid":"cf2d97fd-e622-4fd2-b268-1782efec0aa0"},"objects":[{"apiVersion":"v1","kind":"Service","metadata":{"annotations":{"description":"Exposes and load balances the application pods"},"labels":{"application":"${NAME}","monitoring":"prometheus-angular"},"name":"${NAME}"},"spec":{"ports":[{"name":"web","port":8080,"targetPort":8080},{"name":"angular","port":9113,"targetPort":9113}],"selector":{"name":"${NAME}"}}},{"apiVersion":"v1","kind":"Route","metadata":{"annotations":{"description":"Route for application http service"},"labels":{"application":"${NAME}"},"name":"${NAME}"},"spec":{"host":"${APPLICATION_DOMAIN}","port":{"targetPort":"web"},"tls":{"insecureEdgeTerminationPolicy":"Redirect","termination":"edge"},"to":{"kind":"Service","name":"${NAME}"}}},{"apiVersion":"v1","kind":"ImageStream","metadata":{"annotations":{"description":"Keeps track of changes in the application image"},"labels":{"application":"${NAME}"},"name":"${NAME}"}},{"apiVersion":"v1","kind":"DeploymentConfig","metadata":{"annotations":{"description":"Defines how to deploy the application server"},"labels":{"application":"${NAME}"},"name":"${NAME}"},"spec":{"replicas":1,"revisionHistoryLimit":1,"selector":{"name":"${NAME}"},"strategy":{"activeDeadlineSeconds":21600,"resources":{},"rollingParams":{"intervalSeconds":1,"maxSurge":"25%","maxUnavailable":"25%","timeoutSeconds":600,"updatePeriodSeconds":1},"type":"Rolling"},"template":{"metadata":{"labels":{"name":"${NAME}"},"name":"${NAME}"},"spec":{"containers":[{"env":[{"name":"TZ","value":"America/Sao_Paulo"},{"name":"PORT","value":"8080"}],"image":"${NAME}","livenessProbe":{"httpGet":{"path":"/","port":8080},"initialDelaySeconds":15,"timeoutSeconds":3},"name":"${NAME}","ports":[{"containerPort":8080}],"readinessProbe":{"failureThreshold":3,"httpGet":{"path":"/","port":8080,"scheme":"HTTP"},"initialDelaySeconds":25,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"resources":{"limits":{"cpu":"${CPU_LIMIT}","memory":"${MEMORY_LIMIT}"},"requests":{"cpu":"${CPU_LIMIT}","memory":"${MEMORY_LIMIT}"}}},{"image":"image-registry.openshift-image-registry.svc:5000/openshift/nginx-prometheus-exporter","imagePullPolicy":"Always","name":"${NAME}-exporter","ports":[{"containerPort":9113,"protocol":"TCP"}]}]}},"triggers":[]}}],"parameters":[{"description":"The name assigned to all of the frontend objects defined in this template.","displayName":"Name","name":"NAME","required":true,"value":"angular-app"},{"description":"The OpenShift Namespace where the ImageStream resides.","displayName":"Namespace","name":"NAMESPACE","required":true,"value":"openshift"},{"description":"Maximum amount of memory the application container can use.","displayName":"Memory Limit","name":"MEMORY_LIMIT","required":true,"value":"512Mi"},{"description":"Maximum amount of cpu the application container can use.","displayName":"Cpu Limit","name":"CPU_LIMIT","required":true,"value":"500m"},{"description":"The exposed hostname that will route to the service, if left blank a value will be defaulted.","displayName":"Application Hostname","name":"APPLICATION_DOMAIN"},{"description":"Number of Build made on Azure Devops Server (latest by default).","displayName":"Build Number ADS","name":"BUILD_NUMBER","required":true,"value":"latest"}]}
     openshift.io/display-name: Angular Release Caixa
-    tags: 'hidden,nginx'
-  managedFields:
-    - manager: Mozilla
-      operation: Update
-      apiVersion: template.openshift.io/v1
-      time: '2025-09-26T13:48:51Z'
-      fieldsType: FieldsV1
-      fieldsV1:
-        'f:labels':
-          .: {}
-          'f:template': {}
-        'f:message': {}
-        'f:metadata':
-          'f:annotations':
-            .: {}
-            'f:description': {}
-            'f:iconClass': {}
-            'f:kubectl.kubernetes.io/last-applied-configuration': {}
-            'f:openshift.io/display-name': {}
-            'f:tags': {}
-          'f:labels':
-            .: {}
-            'f:template': {}
-        'f:objects': {}
-        'f:parameters': {}
+    tags: hidden,nginx
+
 message: 'The following service(s) have been created in your project: ${NAME}.'
+
 objects:
   - apiVersion: v1
     kind: Service
@@ -60,7 +33,8 @@ objects:
           targetPort: 9113
       selector:
         name: '${NAME}'
-  - apiVersion: v1
+
+  - apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
       annotations:
@@ -78,7 +52,8 @@ objects:
       to:
         kind: Service
         name: '${NAME}'
-  - apiVersion: v1
+
+  - apiVersion: image.openshift.io/v1
     kind: ImageStream
     metadata:
       annotations:
@@ -86,8 +61,9 @@ objects:
       labels:
         application: '${NAME}'
       name: '${NAME}'
-  - apiVersion: v1
-    kind: DeploymentConfig
+
+  - apiVersion: apps/v1
+    kind: Deployment
     metadata:
       annotations:
         description: Defines how to deploy the application server
@@ -98,39 +74,35 @@ objects:
       replicas: 1
       revisionHistoryLimit: 1
       selector:
-        name: '${NAME}'
+        matchLabels:
+          name: '${NAME}'
       strategy:
-        activeDeadlineSeconds: 21600
-        resources: {}
-        rollingParams:
-          intervalSeconds: 1
+        type: RollingUpdate
+        rollingUpdate:
           maxSurge: 25%
           maxUnavailable: 25%
-          timeoutSeconds: 600
-          updatePeriodSeconds: 1
-        type: Rolling
       template:
         metadata:
           labels:
             name: '${NAME}'
-          name: '${NAME}'
         spec:
           containers:
-            - env:
+            - name: '${NAME}'
+              image: '${NAME}:${BUILD_NUMBER}'
+              imagePullPolicy: IfNotPresent
+              env:
                 - name: TZ
                   value: America/Sao_Paulo
                 - name: PORT
                   value: '8080'
-              image: '${NAME}'
+              ports:
+                - containerPort: 8080
               livenessProbe:
                 httpGet:
                   path: /
                   port: 8080
                 initialDelaySeconds: 15
                 timeoutSeconds: 3
-              name: '${NAME}'
-              ports:
-                - containerPort: 8080
               readinessProbe:
                 failureThreshold: 3
                 httpGet:
@@ -148,41 +120,48 @@ objects:
                 requests:
                   cpu: '${CPU_LIMIT}'
                   memory: '${MEMORY_LIMIT}'
-            - image: 'image-registry.openshift-image-registry.svc:5000/openshift/nginx-prometheus-exporter'
+
+            - name: '${NAME}-exporter'
+              image: image-registry.openshift-image-registry.svc:5000/openshift/nginx-prometheus-exporter
               imagePullPolicy: Always
-              name: '${NAME}-exporter'
               ports:
                 - containerPort: 9113
                   protocol: TCP
-      triggers: []
+
 parameters:
   - name: NAME
     displayName: Name
     description: The name assigned to all of the frontend objects defined in this template.
     value: angular-app
     required: true
+
   - name: NAMESPACE
     displayName: Namespace
     description: The OpenShift Namespace where the ImageStream resides.
     value: openshift
     required: true
+
   - name: MEMORY_LIMIT
     displayName: Memory Limit
     description: Maximum amount of memory the application container can use.
     value: 512Mi
     required: true
+
   - name: CPU_LIMIT
     displayName: Cpu Limit
     description: Maximum amount of cpu the application container can use.
     value: 500m
     required: true
+
   - name: APPLICATION_DOMAIN
     displayName: Application Hostname
-    description: 'The exposed hostname that will route to the service, if left blank a value will be defaulted.'
+    description: The exposed hostname that will route to the service, if left blank a value will be defaulted.
+
   - name: BUILD_NUMBER
     displayName: Build Number ADS
-    description: Number of Build made on Azure Devops Server (latest by default).
+    description: Number of Build made on Azure Devops Server.
     value: latest
     required: true
+
 labels:
   template: angular-caixa-release
